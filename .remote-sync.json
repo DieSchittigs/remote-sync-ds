@@ -1,0 +1,15 @@
+{
+  "transport": "ftp",
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "myhost.com",
+  "target": "/htdocs/mysite",
+  "ignore": [
+    ".remote-sync.json",
+    "node_modules/**",
+    ".git/*"
+  ],
+  "username": "JohnDoe",
+  "password": "supersecret"
+}
