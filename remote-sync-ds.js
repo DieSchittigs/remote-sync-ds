@@ -18,10 +18,8 @@ try{
 
 const gitignorefile = path.resolve(process.cwd(), '.gitignore');
 let gitignore = [];
-if(!fs.existsSync(gitignorefile)){
-	gitignore = require('gitignore-to-glob')(gitignorefile);
-	console.log('No ".gitignore" found!');
-}
+if(fs.existsSync(gitignorefile)) gitignore = require('gitignore-to-glob')(gitignorefile);
+else console.log('No ".gitignore" found!');
 
 const ignore = []
 	.concat(gitignore)
@@ -40,9 +38,7 @@ const watcher = chokidar.watch(process.cwd(), {
 	persistent: true
 });
 
-if(config.watch){
-	_.forEach(config.watch, (watchFile)=> watcher.add(config.watch));
-}
+if(config.watch) watcher.add(config.watch);
 
 try{
 	ftp.connect({
