@@ -2,7 +2,7 @@
 
 const path = require('path');
 const chokidar = require('chokidar');
-const config = require('./.remote-sync.json');
+const config = require(path.resolve(process.cwd(), '.remote-sync.json'));
 const minimatch = require('minimatch');
 const EasyFtp = require('easy-ftp');
 const ftp = new EasyFtp();
