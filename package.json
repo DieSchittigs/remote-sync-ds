@@ -1,11 +1,14 @@
 {
 	"name": "remote-sync-ds",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Standalone script, mimicking the function of the Atom package \"remote-sync\"",
 	"main": "remote-sync-ds.js",
 	"dependencies": {
+		"chalk": "^2.1.0",
 		"chokidar": "^1.7.0",
 		"easy-ftp": "^0.3.36",
+		"gitignore-to-glob": "^0.3.0",
+		"lodash": "^4.17.4",
 		"minimatch": "^3.0.4"
 	},
 	"license": "ISC",

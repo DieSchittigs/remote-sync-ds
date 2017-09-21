@@ -1,47 +1,108 @@
 #!/usr/bin/env node
 
 const path = require('path');
+const fs = require('fs');
 const chokidar = require('chokidar');
-const config = require(path.resolve(process.cwd(), '.remote-sync.json'));
 const minimatch = require('minimatch');
 const EasyFtp = require('easy-ftp');
-const ftp = new EasyFtp();
+const _ = require('lodash');
+const chalk = require('chalk');
+
+let config;
+try{
+	config = require(path.resolve(process.cwd(), '.remote-sync.json'));
+} catch (e){
+	console.log('No ".remote-sync" found!');
+	process.exit(1);
+}
+
+const gitignorefile = path.resolve(process.cwd(), '.gitignore');
+let gitignore = [];
+if(!fs.existsSync(gitignorefile)){
+	gitignore = require('gitignore-to-glob')(gitignorefile);
+	console.log('No ".gitignore" found!');
+}
+
+const ignore = []
+	.concat(gitignore)
+	.concat(config.ignore);
+
 let queue = [];
 let timeout;
+const log = console.log;
+
+const ftp = new EasyFtp();
 
 const watcher = chokidar.watch(process.cwd(), {
-	ignored: config.ignore,
+	ignored: ignore,
 	ignoreInitial: true,
 	followSymlinks: false,
-	persistent: true,
-	atomic: true
+	persistent: true
 });
 
-ftp.connect({
-	type: config.transport,
-	port: config.port,
-    host: config.hostname,
-	user: config.username,
-	password: config.password
-});
+if(config.watch){
+	_.forEach(config.watch, (watchFile)=> watcher.add(config.watch));
+}
+
+try{
+	ftp.connect({
+		type: config.transport || 'ftp',
+		port: config.port  || 21,
+	    host: config.hostname,
+		user: config.username,
+		password: config.password
+	});
+} catch (e){
+	console.log(chalk.error(e));
+}
+
 
 function workQueue(){
 	const files = [];
-	for(let i = 0; i < queue.length; i++){
+	_.forEach(queue, (entry)=>{
+		const remote = path.resolve(config.target, entry);
 		files.push({
-			local: queue[i],
-			remote: path.resolve(config.target, queue[i])
+			local: entry,
+			remote: remote
 		});
-		console.log(queue[i], ' => ', path.resolve(config.target, queue[i]));
-	}
+		log(
+			chalk.blue(entry),
+			'~>',
+			chalk.green(remote)
+		);
+	});
 	queue = [];
-	ftp.upload(files);
+	try{
+		ftp.upload(files);
+	} catch (e){
+		console.log(chalk.error(e));
+	}
+}
+
+function isValidFile(file){
+	isValid = true;
+	_.forEach(ignore, (pattern)=>{
+		if(minimatch(file, pattern, { matchBase: true, dot: true })){
+			isValid = false;
+			return;
+		}
+	});
+	if(!isValid && config.watch){
+		_.forEach(config.watch, (pattern)=>{
+			if(minimatch(file, pattern, { matchBase: true, dot: true })){
+				isValid = true;
+				return;
+			}
+		});
+	}
+	return isValid;
 }
 
 function addFile(file){
 	const _p = path.relative(process.cwd(), file);
-	for(let i = 0; i < config.ignore.length; i++){
-		if(minimatch(_p, config.ignore[i], { matchBase: true, dot: true })) return;
+	if(!isValidFile(_p)){
+		console.log(chalk.yellow('Ignoring ' + _p));
+		return;
 	}
 	if(queue.indexOf(_p) < 0) queue.push(_p);
 	clearTimeout(timeout);
@@ -50,5 +111,6 @@ function addFile(file){
 
 watcher
 	.on('add', addFile)
-	.on('change', addFile)
-	.on('unlink', path => console.log(`File ${path} has been removed`));
+	.on('change', addFile);
+	// TODO: Delete remote file?
+	//.on('unlink', path => console.log(`File ${path} has been removed`));

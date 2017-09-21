@@ -11,5 +11,8 @@
     ".git/*"
   ],
   "username": "JohnDoe",
-  "password": "supersecret"
+  "password": "supersecret",
+  "watch": [
+      "README.md"
+  ]
 }
