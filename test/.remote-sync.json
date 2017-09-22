@@ -7,12 +7,12 @@
   "target": "/htdocs/mysite",
   "ignore": [
     ".remote-sync.json",
-    "node_modules/**",
+    "ignore_me2/*",
     ".git/*"
   ],
   "username": "JohnDoe",
   "password": "supersecret",
   "watch": [
-      "README.md"
+      "ignore_me/not_here/test2.txt"
   ]
 }

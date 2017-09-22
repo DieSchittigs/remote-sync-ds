@@ -7,6 +7,7 @@ const minimatch = require('minimatch');
 const EasyFtp = require('easy-ftp');
 const _ = require('lodash');
 const chalk = require('chalk');
+const log = console.log;
 
 let config;
 try{
@@ -18,8 +19,14 @@ try{
 
 const gitignorefile = path.resolve(process.cwd(), '.gitignore');
 let gitignore = [];
-if(fs.existsSync(gitignorefile)) gitignore = require('gitignore-to-glob')(gitignorefile);
-else console.log('No ".gitignore" found!');
+if(fs.existsSync(gitignorefile)){
+    _gitignore = require('gitignore-to-glob')(gitignorefile);
+    _.forEach(_gitignore, (pattern)=>{
+        if(pattern.substr(0,1) == '!') pattern = pattern.substr(1);
+        gitignore.push(pattern);
+    });
+}
+else log('No ".gitignore" found!');
 
 const ignore = []
 	.concat(gitignore)
@@ -27,7 +34,6 @@ const ignore = []
 
 let queue = [];
 let timeout;
-const log = console.log;
 
 const ftp = new EasyFtp();
 
@@ -49,7 +55,7 @@ try{
 		password: config.password
 	});
 } catch (e){
-	console.log(chalk.error(e));
+    log(chalk.error(e));
 }
 
 
@@ -97,7 +103,7 @@ function isValidFile(file){
 function addFile(file){
 	const _p = path.relative(process.cwd(), file);
 	if(!isValidFile(_p)){
-		console.log(chalk.yellow('Ignoring ' + _p));
+		log(chalk.yellow('Ignoring ' + _p));
 		return;
 	}
 	if(queue.indexOf(_p) < 0) queue.push(_p);
