@@ -80,8 +80,10 @@ function setupWatcher(initial = false) {
                 );
             });
             notifier.notify({
-                'title': 'Remote Sync DS',
-                'message': 'Ready, watching ' + filesFromGit.length + ' files'
+                title: 'Remote Sync DS',
+                message: 'Ready, watching ' + filesFromGit.length + ' files',
+                sound: false,
+                wait: false
             });
         } else {
             _setupWatcher();
@@ -114,8 +116,10 @@ function workQueue() {
     try {
         ftp.upload(files);
         notifier.notify({
-            'title': 'Remote Sync DS',
-            'message': 'Uploaded ' + files.length + ' files'
+            title: 'Remote Sync DS',
+            message: 'Uploaded ' + files.length + ' files',
+            sound: false,
+            wait: false
         });
     } catch (e) {
         console.log(chalk.error(e));
