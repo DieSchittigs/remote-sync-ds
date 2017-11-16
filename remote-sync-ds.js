@@ -82,6 +82,7 @@ function setupWatcher(initial = false) {
             notifier.notify({
                 title: 'Remote Sync DS',
                 message: 'Ready, watching ' + filesFromGit.length + ' files',
+                icon: path.join(__dirname, 'icon.png'),
                 sound: false,
                 wait: false
             });
@@ -118,6 +119,7 @@ function workQueue() {
         notifier.notify({
             title: 'Remote Sync DS',
             message: 'Uploaded ' + files.length + ' files',
+            icon: path.join(__dirname, 'icon.png'),
             sound: false,
             wait: false
         });
