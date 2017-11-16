@@ -1,6 +1,6 @@
 {
 	"name": "remote-sync-ds",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"description": "Standalone script, mimicking the function of the Atom package \"remote-sync\"",
 	"main": "remote-sync-ds.js",
 	"dependencies": {
