@@ -16,7 +16,7 @@ let config;
 try {
     config = require(path.resolve(process.cwd(), '.remote-sync.json'));
 } catch (e) {
-    console.log('No ".remote-sync" found!');
+    log(chalk.red('No ".remote-sync" found. Bye.'));
     process.exit(1);
 }
 
@@ -45,7 +45,17 @@ try {
         password: config.password
     });
 } catch (e) {
-    log(chalk.error(e));
+    log(chalk.red(e));
+}
+
+function showNotification(message){
+    notifier.notify({
+        title: 'Remote Sync DS',
+        message: message,
+        icon: path.join(__dirname, 'icon.png'),
+        sound: false,
+        wait: false
+    });
 }
 
 function _setupWatcher(filesToWatch = null) {
@@ -63,7 +73,7 @@ function _setupWatcher(filesToWatch = null) {
         .on('add', addFile)
         .on('change', addFile);
     // TODO: Delete remote file?
-    //.on('unlink', path => console.log(`File ${path} has been removed`));
+    //.on('unlink', path => log(`File ${path} has been removed`));
 }
 
 function setupWatcher(initial = false) {
@@ -79,13 +89,7 @@ function setupWatcher(initial = false) {
                     chalk.blue(file)
                 );
             });
-            notifier.notify({
-                title: 'Remote Sync DS',
-                message: 'Ready, watching ' + filesFromGit.length + ' files',
-                icon: path.join(__dirname, 'icon.png'),
-                sound: false,
-                wait: false
-            });
+            showNotification('Ready, watching ' + filesFromGit.length + ' files');
         } else {
             _setupWatcher();
             if (!initial) return;
@@ -116,15 +120,9 @@ function workQueue() {
     queue = [];
     try {
         ftp.upload(files);
-        notifier.notify({
-            title: 'Remote Sync DS',
-            message: 'Uploaded ' + files.length + ' files',
-            icon: path.join(__dirname, 'icon.png'),
-            sound: false,
-            wait: false
-        });
+        showNotification('Uploaded ' + files.length + ' files');
     } catch (e) {
-        console.log(chalk.error(e));
+        log(chalk.red(e));
     }
     setupWatcher();
 }
