@@ -13,6 +13,13 @@ const notifier = require('node-notifier');
 const log = console.log;
 
 let config;
+let queue = [];
+let watch = [];
+let ignore = [];
+let timeout;
+let watcher;
+const ftp = new EasyFtp();
+
 try {
     config = require(path.resolve(process.cwd(), '.remote-sync.json'));
 } catch (e) {
@@ -20,21 +27,17 @@ try {
     process.exit(1);
 }
 
-let ignore = [];
-if (config.ignore) ignore = ignore.concat(config.ignore);
-
+if (config.ignore){
+    ignore = ignore.concat(config.ignore);
+}
 if (config.watch) {
     _.forEach(config.watch, (pattern) => {
-        if (pattern.substr(0, 1) == '/') config.watch.push(pattern.substr(1));
+        if (pattern.substr(0, 1) == '/') watch.push(pattern.substr(1));
     });
 }
-
-let queue = [];
-let timeout;
-
-const ftp = new EasyFtp();
-
-let watcher;
+if (config['watch-ds']){
+    watch = watch.concat(config['watch-ds']);
+}
 
 try {
     ftp.connect({
@@ -61,14 +64,13 @@ function showNotification(message){
 function _setupWatcher(filesToWatch = null) {
     if (watcher) watcher.close();
     if (!filesToWatch) filesToWatch = process.cwd();
-    else if (config.watch) {
-        filesToWatch = filesToWatch.concat(config.watch);
-    }
+    else filesToWatch = filesToWatch.concat(watch);
     watcher = chokidar.watch(filesToWatch, {
         ignoreInitial: true,
         followSymlinks: false,
         persistent: true
     });
+    if(config['watch-ds']) watcher.add(config['watch-ds']);
     watcher
         .on('add', addFile)
         .on('change', addFile);
@@ -87,6 +89,13 @@ function setupWatcher(initial = false) {
                     chalk.white(moment().format('HH:mm:ss')),
                     chalk.green('Watching'),
                     chalk.blue(file)
+                );
+            });
+            watch.forEach((fileOrGlob) => {
+                log(
+                    chalk.white(moment().format('HH:mm:ss')),
+                    chalk.green('Also watching'),
+                    chalk.blue(fileOrGlob)
                 );
             });
             showNotification('Ready, watching ' + filesFromGit.length + ' files');
@@ -135,8 +144,8 @@ function isValidFile(file) {
             return;
         }
     });
-    if (!isValid && config.watch) {
-        _.forEach(config.watch, (pattern) => {
+    if (!isValid) {
+        _.forEach(watch, (pattern) => {
             if (minimatch(file, pattern, { matchBase: true, dot: true })) {
                 isValid = true;
                 return;
