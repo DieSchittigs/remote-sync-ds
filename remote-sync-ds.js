@@ -18,6 +18,7 @@ let watch = [];
 let ignore = [];
 let timeout;
 let watcher;
+let notifications = true;
 const ftp = new EasyFtp();
 
 try {
@@ -27,7 +28,10 @@ try {
     process.exit(1);
 }
 
-if (config.ignore){
+if (config.hasOwnProperty('notifications')) {
+    notifications = config.notifications;
+}
+if (config.ignore) {
     ignore = ignore.concat(config.ignore);
 }
 if (config.watch) {
@@ -35,7 +39,7 @@ if (config.watch) {
         if (pattern.substr(0, 1) == '/') watch.push(pattern.substr(1));
     });
 }
-if (config['watch-ds']){
+if (config['watch-ds']) {
     watch = watch.concat(config['watch-ds']);
 }
 
@@ -52,6 +56,9 @@ try {
 }
 
 function showNotification(message){
+    if (!notifications)
+        return;
+
     notifier.notify({
         title: 'Remote Sync DS',
         message: message,
