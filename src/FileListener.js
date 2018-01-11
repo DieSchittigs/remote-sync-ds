@@ -19,6 +19,7 @@ module.exports = class {
         this.watchedFiles = config.filesToWatch();
 
         this.queue = [];
+        this.unlinked = [];
         this.timeout = null;
     }
 
@@ -46,7 +47,13 @@ module.exports = class {
             return;
         }
 
-        if (!_.includes(this.queue, _p)) this.queue.push(_p);
+        if (!_.includes(this.queue, _p)) {
+            if (event == 'unlink')
+                this.unlinked.push(_p);
+
+            this.queue.push(_p);
+        }
+        
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.workQueue.bind(this), 400);
     }
@@ -70,9 +77,15 @@ module.exports = class {
     workQueue() {
         let that = this;
         _.each(this.queue, file => {
+            if (_.includes(that.unlinked, file)) {
+                log(chalk.blue("Deleting"), file);
+                return;
+            }
+
             log(chalk.blue("Uploading"), file);
-            that.notify("Uploaded files.");
         });
+
+        that.notify(this.queue.length + " files uploaded.");
 
         this.queue = [];
     }
