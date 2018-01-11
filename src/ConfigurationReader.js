@@ -38,8 +38,10 @@ module.exports = class ConfigurationReader {
                     ". Is your working directory correct?"
                 )
             );
+            process.exit(1);
         }
 
+        // Finally override any settings we may have added via CLI options
         let program = this.program;
         let cliConfig = {};
         _.each(CLI_OPTIONS, (value, key) => {
@@ -67,9 +69,14 @@ module.exports = class ConfigurationReader {
         };
     }
 
+    filesToIgnore() {
+        return this.config('ignore');
+    }
+
     filesToWatch() {
-        return [
-            'package.json',
-        ];
+        return this.config('watch').map(e => {
+            if (e.startsWith('/')) return e.substring(1);
+            return e;
+        });
     }
 };

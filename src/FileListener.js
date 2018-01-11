@@ -12,10 +12,11 @@ function log(...messages)
 }
 
 module.exports = class {
-    constructor(config) {
-        this.config = config;
+    constructor(config, watcher) {
+        this.config  = config;
+        this.watcher = watcher;
 
-        this.watch = config.filesToWatch();
+        this.watchedFiles = config.filesToWatch();
 
         this.queue = [];
         this.timeout = null;
@@ -51,9 +52,19 @@ module.exports = class {
     }
 
     ready() {
-        _.each(this.watch, file => {
+        _.each(this.watchedFiles, file => {
             log(chalk.blue("Watching"), file);
         })
+    }
+
+    add(files, git = true) {
+        let difference = _.difference(files, this.watchedFiles);
+        _.merge(this.watchedFiles, files);
+
+        this.watcher.add(difference);
+        _.each(difference, file => {
+            log(chalk.blue("Watching"), file, git ? chalk.dim.italic("(discovered via git)") : "");
+        });
     }
 
     workQueue() {

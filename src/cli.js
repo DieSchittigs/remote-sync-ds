@@ -2,6 +2,7 @@
 
 let ConfigurationReader = require('./ConfigurationReader');
 let FileListener = require('./FileListener');
+let GitWatcher   = require('./GitWatcher');
 
 let chokidar = require('chokidar');
 let pjs     = require('../package.json');
@@ -37,14 +38,18 @@ try {
 }
 
 function runWatcher() {
-    let filesToWatch = reader.filesToWatch();
-    let listener = new FileListener(reader);
+    let watchedFiles = reader.filesToWatch();
 
-    let watcher = chokidar.watch(filesToWatch, {
+    let watcher = chokidar.watch(watchedFiles, {
         ignoreInitial: true,
         followSymlinks: false,
         persistent: true
-    })
+    });
+    
+    let listener = new FileListener(reader, watcher);
+
+    let gitWatcher = new GitWatcher();
+    gitWatcher.watch(3000, listener.add.bind(listener));
     
     watcher.on('all', listener.report.bind(listener))
         .on('ready', () => listener.ready());
