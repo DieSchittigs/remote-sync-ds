@@ -61,11 +61,11 @@ module.exports = class ConfigurationReader {
 
     getFTPconfiguration() {
         return {
-            type: this.config('transport', 'ftp'), // Not currently supported
+            type: this.config('transport', 'ftp'), // scp is not currently supported
             port: this.config('port', 21),
             host: this.config('hostname'),
             user: this.config('username'),
-            pass: this.config('password'),
+            pass: this.config('password')
         };
     }
 

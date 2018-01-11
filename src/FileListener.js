@@ -77,20 +77,52 @@ module.exports = class {
 
     workQueue() {
         let that = this;
+
+        let promises = [];
         _.each(this.queue, file => {
+            let remotePath = path.resolve(this.config.config('target'), file);
+
             if (_.includes(that.unlinked, file)) {
                 log(chalk.blue("Deleting"), file);
-
-                // Perform deletion
-                return;
+                promises.push(this.unlinkFile(file, remotePath));
+            } else {
+                log(chalk.blue("Uploading"), file);
+                promises.push(this.uploadFile(file, remotePath));
             }
-
-            log(chalk.blue("Uploading"), file);
-            // Upload files
         });
 
-        that.notify(this.queue.length + " files uploaded.");
+        // Important: Run promises sequentially, not simultaneously!
+        Promise.all(promises)
+            .then(files => {
+                that.notify(files.length + ' files successfully uploaded.');
 
-        this.queue = this.unlinked = [];
+                // Reset queue and unlinked arrays
+                console.log(files);
+            })
+            .catch(errors => {
+                console.log(errors);
+            });
+    }
+
+    uploadFile(local, remote) {
+        let ftp = this.ftp;
+        return new Promise((resolve, reject) => {
+            ftp.put(local, remote, err => {
+                if (err) return reject(err);
+
+                return resolve(local);
+            });
+        });
+    }
+
+    unlinkFile(local, emote) {
+        let ftp = this.ftp;
+        return new Promise((resolve, reject) => {
+            // ftp.raw('delete', remote, err => {
+            //     if (err) return reject(err);
+            //
+            //     return resolve(local); 
+            //});
+        });
     }
 }
