@@ -20,9 +20,10 @@ program
 
 let reader = new ConfigurationReader(program);
 let config = reader.getFTPconfiguration();
+let ftp = null;
 
 try {
-    let ftp = new jsftp(config);
+    ftp = new jsftp(config);
     console.log(chalk.green(`FTP connection with ${chalk.inverse("%s:%i")} established.`), config.host, config.port);
 
     ftp.auth(config.user, config.pass, err => {
@@ -46,7 +47,7 @@ function runWatcher() {
         persistent: true
     });
     
-    let listener = new FileListener(reader, watcher);
+    let listener = new FileListener(reader, watcher, ftp);
 
     let gitWatcher = new GitWatcher();
     gitWatcher.watch(3000, listener.add.bind(listener));

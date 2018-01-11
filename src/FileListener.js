@@ -12,15 +12,16 @@ function log(...messages)
 }
 
 module.exports = class {
-    constructor(config, watcher) {
+    constructor(config, watcher, ftp) {
         this.config  = config;
         this.watcher = watcher;
+        this.ftp     = ftp;
 
         this.watchedFiles = config.filesToWatch();
 
-        this.queue = [];
+        this.queue    = [];
         this.unlinked = [];
-        this.timeout = null;
+        this.timeout  = null;
     }
 
     notify(message) {
@@ -53,7 +54,7 @@ module.exports = class {
 
             this.queue.push(_p);
         }
-        
+
         clearTimeout(this.timeout);
         this.timeout = setTimeout(this.workQueue.bind(this), 400);
     }
@@ -79,14 +80,17 @@ module.exports = class {
         _.each(this.queue, file => {
             if (_.includes(that.unlinked, file)) {
                 log(chalk.blue("Deleting"), file);
+
+                // Perform deletion
                 return;
             }
 
             log(chalk.blue("Uploading"), file);
+            // Upload files
         });
 
         that.notify(this.queue.length + " files uploaded.");
 
-        this.queue = [];
+        this.queue = this.unlinked = [];
     }
 }
