@@ -35,7 +35,7 @@ module.exports = class {
     }
 
     notify(message) {
-        if (!this.config.config('notifications'))
+        if (!this.config.config('notifications', true))
             return;
     
         notifier.notify({

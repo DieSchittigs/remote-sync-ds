@@ -8,7 +8,7 @@ const CLI_OPTIONS = {
     // { foo: "bar" } will override
     // config.bar with program.foo
 
-    notifications: "notifications"
+    notifications: { default: true, overrides: "notifications" }
 };
 
 module.exports = class ConfigurationReader {
@@ -44,15 +44,18 @@ module.exports = class ConfigurationReader {
         // Finally override any settings we may have added via CLI options
         let program = this.program;
         let cliConfig = {};
+        
         _.each(CLI_OPTIONS, (value, key) => {
-            cliConfig[value] = program[key];
+            // Ignore any options that have not been overridden
+            if (program[key] !== value.default)
+                cliConfig[value.overrides] = program[key];
         })
 
         this.loadedConfig = _.merge(localConfig, globalConfig, cliConfig);
     }
 
     config(name, value = null) {
-        if (this.loadedConfig[name]) {
+        if (this.loadedConfig.hasOwnProperty(name)) {
             return this.loadedConfig[name];
         }
 
