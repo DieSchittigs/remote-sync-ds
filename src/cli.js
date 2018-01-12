@@ -22,9 +22,6 @@ let reader = new ConfigurationReader(program);
 let config = reader.getFTPconfiguration();
 let ftp = null;
 
-console.log(reader.config('notifications', true));
-process.exit(0);
-
 try {
     ftp = new jsftp(config);
     console.log(chalk.green(`FTP connection with ${chalk.inverse("%s:%i")} established.`), config.host, config.port);

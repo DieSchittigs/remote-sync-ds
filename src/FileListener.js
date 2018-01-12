@@ -28,6 +28,7 @@ module.exports = class {
         this.ftp     = ftp;
 
         this.watchedFiles = config.filesToWatch();
+        this.ignore = config.filesToIgnore();
 
         this.queue    = [];
         this.unlinked = [];
@@ -54,7 +55,7 @@ module.exports = class {
         // Add to queue
         let _p = path.relative(process.cwd(), file);
         if (_.includes(this.ignore, _p)) {
-            log(chalk.blue("Ignoring change of"), file);
+            log(chalk.yellow("Ignoring change of"), file);
             return;
         }
 
