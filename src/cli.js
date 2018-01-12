@@ -47,11 +47,12 @@ function runWatcher() {
         persistent: true
     });
     
+    // Watch specified files for changes
     let listener = new FileListener(reader, watcher, ftp);
-
-    let gitWatcher = new GitWatcher();
-    gitWatcher.watch(3000, listener.add.bind(listener));
-    
     watcher.on('all', listener.report.bind(listener))
         .on('ready', () => listener.ready());
+
+    // Enable the git watcher to also add all non-git-ignored files
+    let gitWatcher = new GitWatcher();
+    gitWatcher.watch(3000, listener.add.bind(listener));
 }
