@@ -1,14 +1,24 @@
+let Promise  = require('bluebird');
 let notifier = require('node-notifier');
-let moment = require('moment');
-let chalk  = require('chalk');
-let path   = require('path');
-let _ = require('lodash');
+let moment   = require('moment');
+let chalk    = require('chalk');
+let path     = require('path');
+let _        = require('lodash');
 
 function log(...messages)
 {
     console.log(
         chalk.dim(moment().format("HH:mm:ss")) + " " + messages.join(" ")
     );
+}
+
+Promise.series = (promises) => {
+    return Promise.reduce(promises, (values, promise) => {
+        return promise().then(result => {
+            values.push(result);
+            return values;
+        });
+    }, []);
 }
 
 module.exports = class {
@@ -78,51 +88,36 @@ module.exports = class {
     workQueue() {
         let that = this;
 
-        let promises = [];
-        _.each(this.queue, file => {
-            let remotePath = path.resolve(this.config.config('target'), file);
+        let promises = this.queue.map(this.upload.bind(this));
+        Promise.series(promises)
+            .then(total => {
+                that.notify(total.length + ' files successfully uploaded.');
 
-            if (_.includes(that.unlinked, file)) {
-                log(chalk.blue("Deleting"), file);
-                promises.push(this.unlinkFile(file, remotePath));
-            } else {
-                log(chalk.blue("Uploading"), file);
-                promises.push(this.uploadFile(file, remotePath));
-            }
-        });
+                // Remove files from queue and unlinked arrays
+                _.remove(that.queue, e => { return _.includes(total, e); });
+                _.remove(that.unlinked, e => { return _.includes(total, e); });
+            });
+    }
 
-        // Important: Run promises sequentially, not simultaneously!
-        Promise.all(promises)
-            .then(files => {
-                that.notify(files.length + ' files successfully uploaded.');
+    upload(file) {
+        let ftp = this.ftp;
+        let remote = path.resolve(this.config.config('target'), file);
 
-                // Reset queue and unlinked arrays
-                console.log(files);
+        // Set up appropriate function for upload/delete action
+        let upload = _.includes(this.unlinked, file) 
+            ? ['Deleting', 'raw', 'dele', remote] 
+            : ['Uploading', 'put', file, remote];
+
+        return () => {
+            return new Promise((resolve, reject) => {
+                let [text, method, first, second] = upload;
+                log(chalk.blue(text), file);
+
+                this.ftp[method](first, second, err => {
+                    if (err) return reject(err);
+                    return resolve(file);
+                });
             })
-            .catch(errors => {
-                console.log(errors);
-            });
-    }
-
-    uploadFile(local, remote) {
-        let ftp = this.ftp;
-        return new Promise((resolve, reject) => {
-            ftp.put(local, remote, err => {
-                if (err) return reject(err);
-
-                return resolve(local);
-            });
-        });
-    }
-
-    unlinkFile(local, emote) {
-        let ftp = this.ftp;
-        return new Promise((resolve, reject) => {
-            // ftp.raw('delete', remote, err => {
-            //     if (err) return reject(err);
-            //
-            //     return resolve(local); 
-            //});
-        });
+        };
     }
 }
