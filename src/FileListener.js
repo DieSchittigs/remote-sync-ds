@@ -87,16 +87,14 @@ module.exports = class {
     }
 
     workQueue() {
-        let that = this;
-
         let promises = this.queue.map(this.upload.bind(this));
         Promise.series(promises)
             .then(total => {
-                that.notify(total.length + ' files successfully uploaded.');
+                this.notify(total.length + ' files successfully uploaded.');
 
                 // Remove files from queue and unlinked arrays
-                _.remove(that.queue, e => { return _.includes(total, e); });
-                _.remove(that.unlinked, e => { return _.includes(total, e); });
+                _.remove(this.queue, e => { return _.includes(total, e); });
+                _.remove(this.unlinked, e => { return _.includes(total, e); });
             });
     }
 
