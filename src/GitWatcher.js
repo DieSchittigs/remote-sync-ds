@@ -4,7 +4,7 @@ let _    = require('lodash');
 module.exports = class {
     watch(timeout, reporting) {
         setTimeout(() => {
-            Promise.all([this.callConsole('git ls-files -o --exclude-standard'), that.callConsole('git ls-files')])
+            Promise.all([this.callConsole('git ls-files -o --exclude-standard'), this.callConsole('git ls-files')])
                 .then(allFiles => {
                     let files = allFiles.join("\n").split("\n");
                     

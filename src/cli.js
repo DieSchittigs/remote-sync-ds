@@ -15,6 +15,7 @@ let path    = require('path');
 program
     .version(require('../package.json').version)
     .option('--no-notifications', 'Remove notifications')
+    .option('--delete-files', 'Delete remove files on local delete', false)
     .option('-C, --chdir <path>', 'Change the working directory', process.cwd())
     .parse(process.argv);
 

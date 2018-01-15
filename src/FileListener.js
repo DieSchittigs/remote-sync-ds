@@ -52,6 +52,12 @@ module.exports = class {
         if (!_.includes(['add', 'unlink', 'change'], event))
             return;
 
+        // Ignore delete events unless otherwise specified
+        if (event == 'unlink' && !this.config.config('delete')) {
+            log(chalk.yellow("Ignoring deletion of"), file);
+            return;
+        }
+
         // Add to queue
         let _p = path.relative(process.cwd(), file);
         if (_.includes(this.ignore, _p)) {
