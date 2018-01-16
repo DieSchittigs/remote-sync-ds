@@ -59,12 +59,12 @@ module.exports = class ConfigurationReader {
         });
     }
 
-    config(name, value = null) {
+    config(name, defaultValue = null) {
         if (this.loadedConfig.hasOwnProperty(name)) {
             return this.loadedConfig[name];
         }
 
-        return value;
+        return defaultValue;
     }
 
     getFTPconfiguration() {
@@ -82,7 +82,7 @@ module.exports = class ConfigurationReader {
     }
 
     filesToWatch() {
-        return this.config('watch').map(e => {
+        return _.concat(this.config('watch'), this.config('watch-ds', [])).map(e => {
             if (e.startsWith('/')) return e.substring(1);
             return e;
         });
