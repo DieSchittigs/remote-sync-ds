@@ -1,9 +1,10 @@
-let Promise  = require('bluebird');
-let notifier = require('node-notifier');
-let moment   = require('moment');
-let chalk    = require('chalk');
-let path     = require('path');
-let _        = require('lodash');
+let minimatch = require('minimatch');
+let Promise   = require('bluebird');
+let notifier  = require('node-notifier');
+let moment    = require('moment');
+let chalk     = require('chalk');
+let path      = require('path');
+let _         = require('lodash');
 
 function log(...messages)
 {
@@ -60,7 +61,11 @@ module.exports = class {
 
         // Add to queue
         let _p = path.relative(process.cwd(), file);
-        if (_.includes(this.ignore, _p)) {
+        let ignored = _.find(this.ignore, glob => {
+            return minimatch(file, glob.replace(/^\//, ''));
+        });
+
+        if (ignored) {
             log(chalk.yellow("Ignoring change of"), file);
             return;
         }
