@@ -10,7 +10,7 @@
 		"chalk": "^2.1.0",
 		"chokidar": "^1.7.0",
 		"commander": "^2.12.2",
-		"jsftp": "^2.1.2",
+		"easy-ftp": "^0.3.37",
 		"lodash": "^4.17.4",
 		"minimatch": "^3.0.4",
 		"moment": "^2.20.0",
