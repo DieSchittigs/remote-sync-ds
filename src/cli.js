@@ -14,7 +14,7 @@ let chalk   = require('chalk')
 let path    = require('path')
 
 program
-    .version(require('../package.json').version)
+    .version(pjs.version)
     .option('--no-notifications', 'Remove notifications')
     .option('--delete-files', 'Delete remote files on local delete', false)
     .option('-C, --chdir <path>', 'Change the working directory', process.cwd())
@@ -48,3 +48,5 @@ function runWatcher(ftp) {
     let gitWatcher = new GitWatcher()
     gitWatcher.watch(3000, listener.add.bind(listener))
 }
+
+console.log('\n', chalk.bgMagenta(' Welcome to Remote Sync DS v' + pjs.version + ' '), '\n');
