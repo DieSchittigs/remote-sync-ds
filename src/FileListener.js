@@ -1,10 +1,10 @@
-let minimatch = require('minimatch')
-let Promise   = require('bluebird')
-let notifier  = require('node-notifier')
-let moment    = require('moment')
-let chalk     = require('chalk')
-let path      = require('path')
-let _         = require('lodash')
+const minimatch = require('minimatch')
+const Promise   = require('bluebird')
+const notifier  = require('node-notifier')
+const moment    = require('moment')
+const chalk     = require('chalk')
+const path      = require('path')
+const _         = require('lodash')
 
 function log(...messages)
 {
