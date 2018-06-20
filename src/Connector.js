@@ -1,6 +1,6 @@
-let Promise = require('bluebird')
-let chalk = require('chalk')
-let FTP = require('easy-ftp')
+const Promise = require('bluebird')
+const chalk = require('chalk')
+const FTP = require('easy-ftp')
 
 module.exports = class {
     constructor (config) {

@@ -1,5 +1,6 @@
-let exec = require('child_process').exec
-let _    = require('lodash')
+const chalk = require('chalk')
+const exec = require('child_process').exec
+const _    = require('lodash')
 
 module.exports = class {
     watch(timeout, reporting) {
@@ -10,15 +11,22 @@ module.exports = class {
                     
                     reporting(_.compact(files))
                     this.watch(timeout, reporting)
-                }).catch(reason => {
-                    // Silently discard.  
+                }).catch(reasons => {
+                    if (!this.hasOutputReason) {
+                        console.log(chalk.red.underline('Error in git watcher:'))
+                        for (let reason of reasons) {
+                            if (reason.message) console.error(chalk.red(`- ${reason.message}`))
+                        }
+                    }
+
+                    this.hasOutputReason = true
                 })
         }, timeout)
     }
 
     callConsole(command) {
         return new Promise((resolve, reject) => {
-            exec(command, (err, stdout, stderr) => {
+            exec(command, {maxBuffer: 1024 * 1024}, (err, stdout, stderr) => {
                 if (err || stderr) reject([err, stderr])
                 return resolve(stdout)
             })

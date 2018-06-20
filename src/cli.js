@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
-let ConfigurationReader = require('./ConfigurationReader')
-let FileListener = require('./FileListener')
-let GitWatcher   = require('./GitWatcher')
-let Connector    = require('./Connector')
+const ConfigurationReader = require('./ConfigurationReader')
+const FileListener = require('./FileListener')
+const GitWatcher   = require('./GitWatcher')
+const Connector    = require('./Connector')
 
-let chokidar = require('chokidar')
-let pjs     = require('../package.json')
-let program = require('commander')
-let _       = require('lodash')
-let jsftp   = require('jsftp')
-let chalk   = require('chalk')
-let path    = require('path')
+const chokidar = require('chokidar')
+const pjs     = require('../package.json')
+const program = require('commander')
+const _       = require('lodash')
+const jsftp   = require('jsftp')
+const chalk   = require('chalk')
+const path    = require('path')
 
 program
     .version(pjs.version)

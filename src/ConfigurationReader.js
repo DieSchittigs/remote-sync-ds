@@ -1,7 +1,7 @@
-let path  = require('path')
-let os    = require('os')
-let chalk = require('chalk')
-let _     = require('lodash')
+const path  = require('path')
+const os    = require('os')
+const chalk = require('chalk')
+const _     = require('lodash')
 
 const CONFIG_NAME = '.remote-sync.json'
 const CLI_OPTIONS = {
